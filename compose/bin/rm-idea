@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+#echo "Removing .idea folder..."
+bin/rm -rf .idea
+#echo ".idea folder removed."

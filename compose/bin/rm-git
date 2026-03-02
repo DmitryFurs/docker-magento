@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+#echo "Removing .git folder..."
+bin/rm -rf .git
+#echo ".git folder removed."

@@ -1,2 +1,6 @@
 #!/usr/bin/env bash
-bin/cli vendor/bin/phpstan analyse "$@"
+
+bin/analysers/phpcs "$1"
+bin/analysers/phpmd "$1"
+bin/analysers/phpstan "$1"
+bin/analysers/php-compatibility "$1"

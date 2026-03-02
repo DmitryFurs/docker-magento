@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+bin/cli ./vendor/bin/phpstan analyze "$1" --level 1 --configuration ./dev/tests/static/testsuite/Magento/Test/Php/_files/phpstan/phpstan.neon

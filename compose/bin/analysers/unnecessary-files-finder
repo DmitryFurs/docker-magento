@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+bin/clinotty bash -c "
+  cd $1
+  extensions=('7z asp back bak bz2 exe gz iso jar lz lz4 lzma lzo pass rar s7z shar sql sz tar tbz2 tgz tlz xz z zip zst DS_Store')
+  for extension in \${extensions[@]}; do
+    for file in \$(find \$(pwd -P) -type f -name '*.'\${extension} -not -path '*/dev/*'); do
+      echo \$file
+    done
+  done
+"

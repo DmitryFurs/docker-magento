@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+bin/cli ./vendor/bin/phpcs -p --colors --extensions=php,phtml,graphqls/GraphQL,less/CSS,js/PHP --report=csv --standard=Magento2 --exclude=Magento2.Annotation.MethodAnnotationStructure "$1"

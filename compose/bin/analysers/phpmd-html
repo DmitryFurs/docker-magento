@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+bin/cli ./vendor/bin/phpmd "$1" html ./dev/tests/static/testsuite/Magento/Test/Php/_files/phpmd/ruleset.xml --suffixes php,phtml

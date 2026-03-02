@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+bin/clinotty bash -c "
+cd $1
+extensions=('php phtml html')
+for extension in \${extensions[@]}; do
+  for file in \$(find \$(pwd -P) -type f -name '*.'\${extension}); do
+    for line in \$(grep -n \"style=\" \$file | cut -d: -f1); do
+      echo \"::error file=\$file,line=\$line::The inline styles are bad practice and increase the size of html page.\"
+    done
+  done
+done
+"

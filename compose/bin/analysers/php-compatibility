@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+PHP_VERSION=$(bin/cli php -r "echo PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;")
+bin/cli ./vendor/bin/phpcs -p --colors --ignore-annotations --extensions=php,phtml --standard=PHPCompatibility --runtime-set testVersion "$PHP_VERSION" "$1"

@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+echo "Downloading composer.phar, just a moment..."
+
+# shellcheck source=../env/composer.env
+source env/composer.env
+
+bin/clinotty curl -sS -O https://getcomposer.org/download/${COMPOSER_VERSION}/composer.phar
+bin/clinotty curl -sS -O https://getcomposer.org/download/${COMPOSER_VERSION}/composer.phar.sha256sum
+bin/clinotty shasum -a 256 -c composer.phar.sha256sum
+bin/root rm composer.phar.sha256sum
+[ $? != 0 ] && echo "sha256 checksum do not match!" && exit
+
+bin/root rm /usr/local/bin/composer
+bin/root chmod +x composer.phar
+bin/root mv composer.phar /usr/local/bin/composer
+
+bin/composer --version

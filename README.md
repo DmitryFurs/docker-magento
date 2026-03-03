@@ -311,6 +311,7 @@ It is recommended to keep your root docker config files in one repository, and y
 - `bin/magento-version`: Determine the Magento version installed in the current environment.
 - `bin/mftf`: Run the Magento MFTF. Ex: `bin/mftf build:project`
 - `bin/mysql`: Run the MySQL CLI with database config from `env/db.env`. Use `--db <name>` to connect to a specific database. Ex. `bin/mysql -e "EXPLAIN core_config_data"` or `bin/mysql --db other_db < magento.sql`
+- `bin/mysql-prepare`: Decompress and clean a MySQL dump for import (removes `DEFINER` clauses, fixes `utf8mb4_0900_ai_ci` collation). Supports `.sql`, `.gz`, `.bz2`, `.xz`, `.zst`. Ex. `bin/mysql-prepare dump.sql.gz | bin/mysql`
 - `bin/mysqldump`: Backup the Magento database. Ex. `bin/mysqldump > magento.sql`
 - `bin/n98-magerun2`: Access the [n98-magerun2](https://github.com/netz98/n98-magerun2) CLI. Ex: `bin/n98-magerun2 dev:console`
 - `bin/node`: Run the node binary. Ex. `bin/node --version`
@@ -407,6 +408,18 @@ You can use the `bin/mysql` script to import a database, for example a file stor
 
 ```
 bin/mysql < magento.sql
+```
+
+To decompress, clean, and import a dump in one step, use `bin/mysql-prepare`:
+
+```
+bin/mysql-prepare dump.sql.gz | bin/mysql
+```
+
+This removes `DEFINER` clauses and fixes `utf8mb4_0900_ai_ci` collation automatically. To import into a specific database:
+
+```
+bin/mysql-prepare dump.sql.gz | bin/mysql --db testdb
 ```
 
 You also can use `bin/mysqldump` to export the database. The file will appear in your local host directory at `magento.sql`:

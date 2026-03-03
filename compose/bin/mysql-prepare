@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+show_help() {
+  cat >&2 <<'EOF'
+Decompress and clean a MySQL dump for import.
+
+Removes DEFINER clauses and replaces utf8mb4_0900_ai_ci with utf8mb4_unicode_ci.
+Outputs clean SQL to stdout.
+
+Usage:
+  bin/mysql-prepare <file>
+
+Supported formats:
+  .sql          Plain SQL
+  .gz           Gzip
+  .bz2          Bzip2
+  .xz           XZ
+  .zst          Zstandard
+
+Examples:
+  bin/mysql-prepare dump.sql.gz | bin/mysql
+  bin/mysql-prepare dump.sql.gz | bin/mysql --db testdb
+EOF
+  exit 0
+}
+
+[[ "${1:-}" == "--help" || "${1:-}" == "-h" ]] && show_help
+[ -z "${1:-}" ] && echo "Usage: bin/mysql-prepare <file.sql[.gz|.bz2|.xz|.zst]>" >&2 && exit 1
+[ ! -f "$1" ] && echo "File not found: $1" >&2 && exit 1
+
+case "$1" in
+  *.gz)  decompress="gunzip -c" ;;
+  *.bz2) decompress="bunzip2 -c" ;;
+  *.xz)  decompress="xz -dc" ;;
+  *.zst) decompress="zstd -dc" ;;
+  *)     decompress="cat" ;;
+esac
+
+$decompress "$1" \
+  | LC_ALL=C sed 's/DEFINER=[^*]*\*/\*/g' \
+  | LC_ALL=C sed 's/utf8mb4_0900_ai_ci/utf8mb4_unicode_ci/g'

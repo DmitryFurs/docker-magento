@@ -2,6 +2,12 @@
 
 # shellcheck source=../env/db.env
 source env/db.env
+
+if [[ "$1" == "--db" ]]; then
+  MYSQL_DATABASE="$2"
+  shift 2
+fi
+
 if [ -t 0 ]; then
   # Need tty to run mysql shell
   bin/cli mysql -h"${MYSQL_HOST}" -u"${MYSQL_USER}" -p"${MYSQL_PASSWORD}" "${MYSQL_DATABASE}" "$@"

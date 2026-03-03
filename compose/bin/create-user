@@ -1,21 +1,41 @@
 #!/usr/bin/env bash
 
 read -r -p "Create an admin (a) or a customer (c)? [a/c]: " account_type
-[[ "$account_type" == [Aa] ]] && read -r -p "Username: " USERNAME
-read -r -p "Email: " EMAIL
-read -r -p "Password (at least 8 characters): " PASSWORD
-read -r -p "First Name: " FIRSTNAME
-read -r -p "Last Name: " LASTNAME
 
 if [[ "$account_type" == [Aa] ]]; then
+  read -r -p "Enter details manually (m) or use env file (e)? [m/e]: " admin_source
+
+  if [[ "$admin_source" == [Ee] ]]; then
+    source env/magento.env
+    USERNAME="${MAGENTO_ADMIN_USER}"
+    PASSWORD="${MAGENTO_ADMIN_PASSWORD}"
+    EMAIL="${MAGENTO_ADMIN_EMAIL}"
+    FIRSTNAME="${MAGENTO_ADMIN_FIRST_NAME}"
+    LASTNAME="${MAGENTO_ADMIN_LAST_NAME}"
+  elif [[ "$admin_source" == [Mm] ]]; then
+    read -r -p "Username: " USERNAME
+    read -r -p "Email: " EMAIL
+    read -r -p "Password (at least 8 characters): " PASSWORD
+    read -r -p "First Name: " FIRSTNAME
+    read -r -p "Last Name: " LASTNAME
+  else
+    echo "Invalid option. Please choose either m or e."
+    exit 1
+  fi
+
   bin/magento admin:user:create \
     --admin-user="${USERNAME}" \
     --admin-password="${PASSWORD}" \
     --admin-email="${EMAIL}" \
     --admin-firstname="${FIRSTNAME}" \
     --admin-lastname="${LASTNAME}"
+
 elif [[ "$account_type" == [Cc] ]]; then
+  read -r -p "Email: " EMAIL
+  read -r -p "Password (at least 8 characters): " PASSWORD
+  read -r -p "First Name: " FIRSTNAME
+  read -r -p "Last Name: " LASTNAME
   bin/n98-magerun2 customer:create "${EMAIL}" "${PASSWORD}" "${FIRSTNAME}" "${LASTNAME}"
 else
-    echo "Invalid option. Please choose either a or c."
+  echo "Invalid option. Please choose either a or c."
 fi

@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+step() {
+    echo ""
+    echo "==> $1"
+    echo ""
+}
+
+step "Step 1: Cleaning container artifacts"
+bin/clinotty bash -c "rm -rf vendor_orig vendor.patch vendor_files_to_check.patch patch-helper-output.txt classmap.json"
+
+step "Step 2: Removing upgrade patch helper tool"
+bin/rootnotty bash -c "rm -rf /var/www/upgrade-patch-helper"
+
+step "Step 3: Regenerating autoload (restoring PSR-4 fallback)"
+bin/clinotty composer dump-autoload
+
+step "Step 4: Cleaning host artifacts"
+rm -rf src/vendor_orig
+rm -f src/vendor.patch src/vendor_files_to_check.patch src/patch-helper-output.txt src/classmap.json
+rm -f src/warnings.json src/infoNotices.json src/results.md
+
+echo ""
+echo "Cleanup complete!"
+echo "  - Container: vendor_orig/ and generated files removed"
+echo "  - Container: /var/www/upgrade-patch-helper removed"
+echo "  - Container: autoload regenerated (PSR-4 fallback restored)"
+echo "  - Host: src/vendor_orig and generated files removed"

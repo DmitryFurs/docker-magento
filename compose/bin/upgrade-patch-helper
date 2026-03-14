@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+UPGRADE_HELPER_REPO="https://github.com/idhlagency/ampersand-magento2-upgrade-patch-helper"
+UPGRADE_HELPER_PATH="/var/www/upgrade-patch-helper"
+
+step() {
+    echo ""
+    echo "==> $1"
+    echo ""
+}
+
+step "Step 0: Cleaning up leftovers from previous runs"
+bin/clinotty bash -c "rm -rf vendor_orig vendor.patch vendor_files_to_check.patch patch-helper-output.txt classmap.json"
+
+step "Step 1: Preparing vendor folder"
+bin/clinotty composer install
+
+step "Step 2: Backing up vendor folder"
+bin/clinotty mv vendor/ vendor_orig/
+
+step "Step 3: Collecting packages to upgrade"
+packages=()
+while true; do
+    read -rp "Enter package name (or press Enter to finish): " pkg
+    [[ -z "$pkg" ]] && break
+    read -rp "Enter version for $pkg (or press Enter to keep current constraint): " version
+    if [[ -n "$version" ]]; then
+        bin/clinotty composer remove "$pkg" --no-update
+        bin/clinotty composer require "$pkg" "$version" --no-update
+    fi
+    packages+=("$pkg")
+done
+
+if [[ ${#packages[@]} -eq 0 ]]; then
+    echo "No packages specified. Exiting."
+    exit 1
+fi
+
+step "Step 4: Running composer update"
+bin/clinotty composer update "${packages[@]}" -w
+
+step "Step 5: Generating vendor diff"
+bin/clinotty bash -c 'diff -urN vendor_orig/ vendor/ > vendor.patch; [ $? -le 1 ]'
+
+step "Step 6: Installing Upgrade Patch Helper"
+bin/rootnotty bash -c "rm -rf $UPGRADE_HELPER_PATH && git clone $UPGRADE_HELPER_REPO $UPGRADE_HELPER_PATH && cd $UPGRADE_HELPER_PATH && composer install"
+
+step "Step 7: Running analysis"
+bin/rootnotty bash -c "cd $UPGRADE_HELPER_PATH && php bin/patch-helper.php analyse /var/www/html/ | tee /var/www/html/patch-helper-output.txt"
+
+step "Step 8: Generating classmap"
+bin/clinotty composer dump-autoload --classmap-authoritative
+bin/clinotty bash -c 'php -r "\$classmap=require_once(\"vendor/composer/autoload_classmap.php\"); echo json_encode(\$classmap);" > classmap.json'
+
+step "Step 9: Copying results to host"
+rm -rf src/vendor src/vendor_orig
+bin/copyfromcontainer vendor
+bin/copyfromcontainer vendor_orig
+bin/copyfromcontainer vendor.patch
+bin/copyfromcontainer vendor_files_to_check.patch
+bin/copyfromcontainer patch-helper-output.txt
+bin/copyfromcontainer classmap.json
+
+echo ""
+echo "Done! Output files are in src/"
+echo "  - vendor.patch"
+echo "  - vendor_files_to_check.patch"
+echo "  - patch-helper-output.txt"
+echo "  - classmap.json"
+echo ""
+echo "You can now use elgentos/magento2-upgrade-gui to browse the results."

@@ -1,9 +1,27 @@
 #!/usr/bin/env bash
-set -o errexit
-mkdir -p tmpupdate && cd "$_"
-curl -s https://raw.githubusercontent.com/markshust/docker-magento/master/lib/template | bash
-rm -rf .git
-rsync -av --checksum ./ ../
-cd ..
-rm -rf tmpupdate
-echo "docker-magento has been updated, run bin/restart to apply the updates"
+set -euo pipefail
+
+REPO="DmitryFurs/docker-magento"
+BRANCH="custom"
+TMPDIR=$(mktemp -d)
+
+trap 'rm -rf "$TMPDIR"' EXIT
+
+echo "Fetching $BRANCH branch from $REPO..."
+git init -qqq "$TMPDIR/repo"
+cd "$TMPDIR/repo"
+git remote add origin "https://github.com/$REPO.git"
+git fetch origin "$BRANCH" -qqq
+git checkout "origin/$BRANCH" -- compose/bin compose/Makefile
+cd - > /dev/null
+
+rm -rf bin
+cp -a "$TMPDIR/repo/compose/bin" bin/
+rm -rf env
+cp -a "$TMPDIR/repo/compose/env" env/
+rm -rf template
+cp -a "$TMPDIR/repo/compose/env" template/
+cp -a "$TMPDIR/repo/compose/Makefile" Makefile
+
+echo "docker-magento, bin/, env/, template/ and Makefile have been updated from $REPO@$BRANCH"
+echo "Run bin/restart to apply the updates"

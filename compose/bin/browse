@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -o errexit
+
+# shellcheck source=../env/magento.env
+source env/magento.env
+
+open "https://${MAGENTO_DOMAIN}/"

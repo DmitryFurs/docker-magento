@@ -12,16 +12,10 @@ git init -qqq "$TMPDIR/repo"
 cd "$TMPDIR/repo"
 git remote add origin "https://github.com/$REPO.git"
 git fetch origin "$BRANCH" -qqq
-git checkout "origin/$BRANCH" -- compose/bin compose/Makefile
+git checkout "origin/$BRANCH" -- compose
 cd - > /dev/null
 
-rm -rf bin
-cp -a "$TMPDIR/repo/compose/bin" bin/
-rm -rf env
-cp -a "$TMPDIR/repo/compose/env" env/
-rm -rf template
-cp -a "$TMPDIR/repo/compose/template" template/
-cp -a "$TMPDIR/repo/compose/Makefile" Makefile
+rsync -a --delete --exclude='src' --exclude='dumps' --exclude='ticket' "$TMPDIR/repo/compose/" ./
 
-echo "docker-magento, bin/, env/, template/ and Makefile have been updated from $REPO@$BRANCH"
+echo "docker-magento has been updated from $REPO@$BRANCH"
 echo "Run bin/restart to apply the updates"

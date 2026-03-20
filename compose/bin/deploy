@@ -1,10 +1,64 @@
 #!/usr/bin/env bash
-bin/composer install
-bin/magento maintenance:enable
-bin/cli rm -rf generated/code var/view_preprocessed
-bin/magento cache:flush
-bin/magento setup:upgrade
-bin/magento setup:di:compile
-bin/magento setup:static-content:deploy en_US "$@" -f
-bin/magento maintenance:disable
-bin/magento cache:flush
+set -euo pipefail
+
+MODE="developer"
+REMAINING_ARGS=()
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --mode)
+            if [[ -z "${2:-}" ]]; then
+                echo "Error: --mode requires a value [developer|production]" >&2
+                exit 1
+            fi
+            MODE="$2"
+            shift 2
+            ;;
+        --help|-h)
+            echo "Usage: bin/deploy [--mode developer|production] [additional args]"
+            echo ""
+            echo "Options:"
+            echo "  --mode     Deployment mode: developer (default) or production"
+            echo "  --help     Show this help message"
+            echo ""
+            echo "Additional arguments are passed to setup:static-content:deploy (production mode only)."
+            echo ""
+            echo "Examples:"
+            echo "  bin/deploy                        # developer mode (default)"
+            echo "  bin/deploy --mode developer       # explicit developer mode"
+            echo "  bin/deploy --mode production      # full production deploy"
+            echo "  bin/deploy --mode production -j4  # production with extra static-content args"
+            exit 0
+            ;;
+        *)
+            REMAINING_ARGS+=("$1")
+            shift
+            ;;
+    esac
+done
+
+if [[ "$MODE" != "developer" && "$MODE" != "production" ]]; then
+    echo "Error: Invalid mode '$MODE'. Must be 'developer' or 'production'." >&2
+    exit 1
+fi
+
+if [[ "$MODE" == "developer" ]]; then
+    bin/composer install
+    bin/composer dump-autoload
+    bin/cli rm -rf generated/code var/view_preprocessed
+    bin/magento setup:upgrade
+    bin/magento deploy:mode:set developer
+    bin/magento cache:flush
+else
+    bin/composer install --no-dev
+    bin/magento maintenance:enable
+    bin/cli rm -rf generated/code var/view_preprocessed
+    bin/magento deploy:mode:set production --skip-compilation
+    bin/magento setup:upgrade
+    bin/magento setup:di:compile
+    bin/composer dump-autoload -o --apcu
+    bin/magento setup:static-content:deploy en_US ${REMAINING_ARGS[@]+"${REMAINING_ARGS[@]}"} -f
+    #bin/magento indexer:reindex
+    bin/magento cache:flush
+    bin/magento maintenance:disable
+fi

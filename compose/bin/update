@@ -15,7 +15,13 @@ git fetch origin "$BRANCH" -qqq
 git checkout "origin/$BRANCH" -- compose
 cd - > /dev/null
 
-rsync -a --delete --include='.gitignore' --exclude='.*' --exclude='src' --exclude='dumps' --exclude='images' --exclude='ticket' "$TMPDIR/repo/compose/" ./
+rsync -a --delete --include='.gitignore' \
+      --exclude='.*' \
+      --exclude='src' \
+      --exclude='dumps' \
+      --exclude='images' \
+      --exclude='ticket' \
+      "$TMPDIR/repo/compose/" ./
 
 echo "docker-magento has been updated from $REPO@$BRANCH"
 echo "Run bin/restart to apply the updates"

@@ -16,6 +16,7 @@ services:
       - ./src/var:/var/www/html/var:cached
       #- ./src/auth.json:/var/www/html/auth.json:cached
       #- ./src/m2-hotfixes:/var/www/html/m2-hotfixes:cached
+      #- ./src/.magento.env.yaml:/var/www/html/.magento.env.yaml:cached
       #- ./src/composer.patches.json:/var/www/html/composer.patches.json:cached
       #- ./src/lib/patches:/var/www/html/lib/patches:cached
       #- ./src/lib/artifacts:/var/www/html/lib/artifacts:cached

@@ -21,6 +21,7 @@
 - [Custom CLI Commands](#custom-cli-commands)
 - [Misc Info](#misc-info)
 - [Known Issues](#known-issues)
+- [Alternatives](#alternatives)
 - [Credits](#credits)
 - [License](#license)
 
@@ -31,16 +32,20 @@ View Dockerfiles for the latest tags:
 - [markoshust/magento-nginx (Docker Hub)](https://hub.docker.com/r/markoshust/magento-nginx/)
   - [`1.18`, `1.18-8`](images/nginx/1.18)
   - [`1.22`, `1.22-0`](images/nginx/1.22)
-  - [`1.24`, `1.24-0`](images/nginx/1.24)
+  - [`1.24`, `1.24-1`](images/nginx/1.24)
+  - [`1.26`, `1.26-0`](images/nginx/1.26)
+  - [`1.28`, `1.28-0`](images/nginx/1.28)
 - [markoshust/magento-php (Docker Hub)](https://hub.docker.com/r/markoshust/magento-php/)
-  - [`8.1-fpm`, `8.1-fpm-7`](images/php/8.1)
-  - [`8.2-fpm`, `8.2-fpm-6`](images/php/8.2)
-  - [`8.3-fpm`, `8.3-fpm-4`](images/php/8.3)
-  - [`8.4-fpm`, `8.4-fpm-0`](images/php/8.4)
+  - [`8.1-fpm`, `8.1-fpm-9`](images/php/8.1) · [`8.1-fpm-xdebug`, `8.1-fpm-xdebug-9`](images/php/8.1)
+  - [`8.2-fpm`, `8.2-fpm-9`](images/php/8.2) · [`8.2-fpm-xdebug`, `8.2-fpm-xdebug-9`](images/php/8.2)
+  - [`8.3-fpm`, `8.3-fpm-7`](images/php/8.3) · [`8.3-fpm-xdebug`, `8.3-fpm-xdebug-7`](images/php/8.3)
+  - [`8.4-fpm`, `8.4-fpm-2`](images/php/8.4) · [`8.4-fpm-xdebug`, `8.4-fpm-xdebug-2`](images/php/8.4)
+  - [`8.5-fpm`, `8.5-fpm-0`](images/php/8.5) · [`8.5-fpm-xdebug`, `8.5-fpm-xdebug-0`](images/php/8.5)
 - [markoshust/magento-opensearch (Docker Hub)](https://hub.docker.com/r/markoshust/magento-opensearch/)
   - [`1.2`, `1.2-0`](images/opensearch/1.2)
   - [`2.5`, `2.5-1`](images/opensearch/2.5)
   - [`2.12`, `2.12-0`](images/opensearch/2.12)
+  - [`3`, `3-0`](images/opensearch/3)
 - [markoshust/magento-elasticsearch (Docker Hub)](https://hub.docker.com/r/markoshust/magento-elasticsearch/)
   - [`7.16`, `7.16-0`](images/elasticsearch/7.16)
   - [`7.17`, `7.17-1`](images/elasticsearch/7.17)
@@ -53,7 +58,9 @@ View Dockerfiles for the latest tags:
   - [`3.9`, `3.9-0`](images/rabbitmq/3.9)
   - [`3.11`, `3.11-1`](images/rabbitmq/3.11)
   - [`3.12`, `3.12-0`](images/rabbitmq/3.12)
+  - [`3.13`, `3.13-0`](images/rabbitmq/3.13)
   - [`4.1`, `4.1-0`](images/rabbitmq/4.1)
+  - [`4.2`, `4.2-0`](images/rabbitmq/4.2)
 - [markoshust/ssh (Docker Hub)](https://hub.docker.com/r/markoshust/magento-ssh/)
   - [`latest`](images/ssh)
 
@@ -110,7 +117,7 @@ Set Up a Magento 2 Development Environment with Docker
 #### Xdebug
 
 - <a href="https://courses.m.academy/courses/set-up-magento-2-development-environment-docker/lectures/9064478" target="_blank">Install the Xdebug helper browser plugin for Chrome & PhpStorm</a>
-- <a href="https://courses.m.academy/courses/set-up-magento-2-development-environment-docker/lectures/9064482" target="_blank">Enable disable check the status of Xdebug</a>
+- Trigger Xdebug with the `XDEBUG_SESSION` cookie (set via the Xdebug Helper browser extension) — no CLI toggle needed
 - <a href="https://courses.m.academy/courses/set-up-magento-2-development-environment-docker/lectures/9064615" target="_blank">Configure PhpStorm for Xdebug connections</a>
 - <a href="https://courses.m.academy/courses/set-up-magento-2-development-environment-docker/lectures/9064617" target="_blank">Trigger an Xdebug breakpoint in PhpStorm</a>
 - <a href="https://courses.m.academy/courses/set-up-magento-2-development-environment-docker/lectures/36677538" target="_blank">Trigger an Xdebug breakpoint for CLI commands in PhpStorm</a>
@@ -151,10 +158,10 @@ mkdir -p ~/Sites/magento
 cd $_
 
 # Run this automated one-liner from the directory you want to install your project.
-curl -s https://raw.githubusercontent.com/DmitryFurs/docker-magento/custom/lib/onelinesetup | bash -s -- magento.test community 2.4.8-p3
+curl -s https://raw.githubusercontent.com/DmitryFurs/docker-magento/master/lib/onelinesetup | bash -s -- magento.test mageos 3.0.0
 ```
 
-The `magento.test` above defines the hostname to use, `community` is the Magento edition, and the `2.4.8-p3` defines the Magento version to install. Note that since we need a write to `/etc/hosts` for DNS resolution, you will be prompted for your system password during setup.
+The `magento.test` above defines the hostname to use, `mageos` is the edition (Mage-OS, the default), and `3.0.0` defines the version to install. Pass `community 2.4.9` (or another edition/version pair) instead to install Adobe Commerce / Magento Open Source. Note that since we need a write to `/etc/hosts` for DNS resolution, you will be prompted for your system password during setup.
 
 After the one-liner above completes running, you should be able to access your site at `https://magento.test`.
 
@@ -180,10 +187,11 @@ cd $_
 # Download the Docker Compose template:
 curl -s https://raw.githubusercontent.com/DmitryFurs/docker-magento/custom/lib/template | bash
 
-# Download the version of Magento you want to use with:
-bin/download community 2.4.8-p3
-# You can specify the edition (community, enterprise, mageos) and version (2.4.7-p3, 1.0.5, etc.)
-# If no arguments are passed in, the edition defaults to "community"
+# Download the version of Magento (or Mage-OS) you want to use with:
+bin/download mageos 3.0.0
+# You can also specify the edition (mageos, community, enterprise) and version (3.0.0, 2.4.9, etc.)
+# bin/download community 2.4.9
+# If no arguments are passed in, the edition defaults to "mageos"
 # If no version is specified, it defaults to the most recent version defined in `bin/download`
 
 # or for Magento core development:
@@ -229,8 +237,8 @@ bin/composer install
 # Import existing database:
 bin/mysql < ../existing/magento.sql
 
-# Update database connection details to use the above Docker MySQL credentials:
-# Also note: creds for the MySQL server are defined at startup from env/db.env
+# Update database connection details to use the above Docker database credentials:
+# Also note: creds for the database server (MariaDB by default) are defined at startup from env/db.env
 # vi src/app/etc/env.php
 
 # Import app-specific environment settings:
@@ -275,13 +283,59 @@ We recommend keeping your docker config files in version control, so you can mon
 
 It is recommended to keep your root docker config files in one repository, and your Magento code setup in another. This ensures the Magento base path lives at the top of one specific repository, which makes automated build pipelines and deployments easy to manage, and maintains compatibility with projects such as Magento Cloud.
 
+### Persisting local compose changes across updates
+
+Files shipped by the template (`compose.yaml`, `compose.dev.yaml`, `compose.healthcheck.yaml`) are overwritten by `bin/update`. To keep local Docker Compose tweaks that survive updates, create a `compose.override.yaml` file in your project root. If present, `bin/docker-compose` will automatically include it last in the `-f` chain so its values take precedence.
+
+For example, if port `3306` is already in use on your host and you want to expose the `db` container on `3307` instead:
+
+```yaml
+# compose.override.yaml
+services:
+  db:
+    ports:
+      - "3307:3306"
+```
+
+`bin/update` will not touch `compose.override.yaml`, so your customizations stick around.
+
+### Auto-detected service image versions
+
+When you install Magento or Mage-OS via `bin/download` (or directly through the onelinesetup script), `bin/detect-versions` runs first and pins the PHP, nginx, OpenSearch, database, RabbitMQ, and cache images that match the chosen edition/version. The pins are written to a generated `compose.versions.yaml` that loads after `compose.yaml`/`compose.dev.yaml` so its image tags override the defaults.
+
+Load order (later wins):
+
+```
+compose.yaml
+compose.healthcheck.yaml
+compose.dev.yaml          (unless --no-dev)
+compose.versions.yaml     (auto-generated — gitignored)
+compose.override.yaml     (your hand-edited overrides — still wins)
+```
+
+The source of truth for which images map to which Magento/Mage-OS versions is `compose/lib/versions.tsv` (in this repo's template). One row per supported major.minor; the row's `version` column is a boundary-aware prefix matched against your installed version so all patches roll up to the same row.
+
+**Regenerating manually.** If you upgrade Magento in-place (e.g. `composer require magento/product-community-edition:^2.4.9`), the existing `compose.versions.yaml` may drift from the new version. `bin/start` runs `bin/detect-versions --check` as a non-fatal pre-flight and prints a warning if the file is missing or stale. To regenerate:
+
+```
+bin/detect-versions
+```
+
+**Hand-edited `compose.yaml` pins.** Because `compose.versions.yaml` loads after `compose.yaml`, a generated pin will override any image you hand-edited in `compose.yaml`. If you have customized image tags in `compose.yaml` and want to keep them, either:
+
+1. don't run `bin/detect-versions` (and `rm compose.versions.yaml` if it was previously generated), or
+2. move your image overrides into `compose.override.yaml`, which loads last and wins.
+
+**Backwards compatibility.** `compose.versions.yaml` is optional. Without one on disk, `bin/docker-compose` behaves exactly as it did before — the auto-detect feature only kicks in for new installs or when you explicitly run `bin/detect-versions`. To roll back, delete the file: `rm compose.versions.yaml`.
+
 ## Custom CLI Commands
 
 - `bin/analyse`: Run `phpstan analyse` within the container to statically analyse code, passing in directory to analyse. Ex. `bin/analyse app/code`
 - `bin/bash`: Drop into the bash prompt of your Docker container. The `phpfpm` container should be mainly used to access the filesystem within Docker.
 - `bin/blackfire`: Disable or enable Blackfire. Accepts argument `disable`, `enable`, or `status`. Ex. `bin/blackfire enable`
 - `bin/cache-clean`: Access the [cache-clean](https://github.com/mage2tv/magento-cache-clean) CLI. Note the watcher is automatically started at startup in `bin/start`. Ex. `bin/cache-clean config full_page`
-- `bin/check-dependencies`: Provides helpful recommendations for dependencies tailored to the chosen Magento version.
+- `bin/check-dependencies`: Provides helpful recommendations for dependencies tailored to the chosen Magento version. Reads from `compose/lib/versions.tsv` for currently-supported versions so it stays in sync with `bin/detect-versions`.
+- `bin/detect-versions`: Generate a `compose.versions.yaml` that pins service image tags (PHP, nginx, OpenSearch, db, RabbitMQ, cache) to match your installed Magento/Mage-OS version. Run with no args to auto-resolve from `src/composer.json`, or pass `[edition] [version]` explicitly. Add `--check` for a read-only drift check (used as a pre-flight in `bin/start`). See the "Auto-detected service image versions" section above for the load order and override semantics.
 - `bin/cli`: Run any CLI command without going into the bash prompt. Ex. `bin/cli ls`
 - `bin/clinotty`: Run any CLI command with no TTY. Ex. `bin/clinotty chmod u+x bin/magento`
 - `bin/cliq`: The same as `bin/cli`, but pipes all output to `/dev/null`. Useful for a quiet CLI, or implementing long-running processes.
@@ -291,15 +345,15 @@ It is recommended to keep your root docker config files in one repository, and y
 - `bin/copytocontainer`: Copy folders or files from host to container. Ex. `bin/copytocontainer --all`
 - `bin/create-user`: Create either an admin user or customer account.
 - `bin/cron`: Start or stop the cron service. Ex. `bin/cron start`
-- `bin/debug-cli`: Enable Xdebug for bin/magento, with an optional argument of the IDE key. Defaults to PHPSTORM Ex. `bin/debug-cli enable PHPSTORM`
+- `bin/debug-cli`: Run a CLI command inside the `phpfpm-xdebug` container, with Xdebug enabled. Ex. `bin/debug-cli bin/magento indexer:reindex`
 - `bin/deploy`: Runs the standard Magento deployment process commands. Pass extra locales besides `en_US` via an optional argument. Ex. `bin/deploy nl_NL`
 - `bin/dev-test-run`: Facilitates running PHPUnit tests for a specified test type (e.g., integration). It expects the test type as the first argument and passes any additional arguments to PHPUnit, allowing for customization of test runs. If no test type is provided, it prompts the user to specify one before exiting.
 - `bin/dev-urn-catalog-generate`: Generate URN's for PhpStorm and remap paths to local host. Restart PhpStorm after running this command.
 - `bin/devconsole`: Alias for `bin/n98-magerun2 dev:console`
-- `bin/docker-compose`: Support V1 (`docker-compose`) and V2 (`docker compose`) docker compose command, and use custom configuration files, such as `compose.yml` and `compose.dev.yml`
+- `bin/docker-compose`: Support V1 (`docker-compose`) and V2 (`docker compose`) docker compose command, and use custom configuration files such as `compose.yaml` and `compose.dev.yaml`. Automatically includes `compose.override.yaml` if present, which is a convenient place for local tweaks that should survive `bin/update`.
 - `bin/docker-start`: Start the Docker application (either Orbstack or Docker Desktop)
 - `bin/docker-stats`: Display container name and container ID, status for CPU, memory usage(in MiB and %), and memory limit of currently-running Docker containers.
-- `bin/download`: Download specific Magento version from Composer to the container, with optional arguments of the type ("community" [default], "enterprise", or "mageos") and version ([default] is defined in `bin/download`). Ex. `bin/download mageos` or `bin/download enterprise 2.4.8`
+- `bin/download`: Download a specific Magento/Mage-OS version from Composer to the container, with optional arguments of the type ("mageos" [default], "community", or "enterprise") and version ([default] is defined in `bin/download`). Ex. `bin/download` (Mage-OS 3.0.0) or `bin/download community 2.4.9`
 - `bin/ece-patches`: Run the Cloud Patches CLI. Ex: `bin/ece-tools apply`
 - `bin/fixowns`: This will fix filesystem ownerships within the container.
 - `bin/fixperms`: This will fix filesystem permissions within the container.
@@ -334,6 +388,7 @@ It is recommended to keep your root docker config files in one repository, and y
 - `bin/setup-grunt`: Install and configure Grunt JavaScript task runner to compile .less files
 - `bin/setup-install`: Automates the installation process for a Magento instance.
 - `bin/setup-integration-tests`: Script to set up integration tests.
+- `bin/setup-nginx`: Update Magento's `nginx.conf` so cookie-triggered Xdebug routing works. Auto-run by `bin/setup`; existing projects can re-run it once to opt in.
 - `bin/setup-pwa-studio`: (BETA) Install PWA Studio (requires NodeJS and Yarn to be installed on the host machine). Pass in your base site domain, otherwise the default `master-7rqtwti-mfwmkrjfqvbjk.us-4.magentosite.cloud` will be used. Ex: `bin/setup-pwa-studio magento.test`.
 - `bin/setup-pwa-studio-sampledata`: This script makes it easier to install Venia sample data. Pass in your base site domain, otherwise the default `master-7rqtwti-mfwmkrjfqvbjk.us-4.magentosite.cloud` will be used. Ex: `bin/setup-pwa-studio-sampledata magento.test`.
 - `bin/setup-ssl`: Generate an SSL certificate for one or more domains. Ex. `bin/setup-ssl magento.test foo.test`
@@ -347,7 +402,7 @@ It is recommended to keep your root docker config files in one repository, and y
 - `bin/test/unit-coverage`: Generate unit tests coverage reports, saved to the folder `dev/tests/unit/report`. Ex. `bin/test/unit-coverage my-dir`
 - `bin/test/unit-xdebug`: Run unit tests with Xdebug. Ex. `bin/test/unit-xdebug my-dir`
 - `bin/update`: Update your project to the most recent version of `docker-magento`.
-- `bin/xdebug`: Set a custom xdebug.mode (Ex. `bin/xdebug debug`) or check the current status and get all available modes (Ex. `bin/xdebug`)
+- `bin/xdebug`: _Deprecated._ Xdebug now runs in a dedicated `phpfpm-xdebug` container and is triggered by the `XDEBUG_SESSION` cookie — no toggle script is needed. See the Xdebug sections below for setup.
 
 ## Misc Info
 
@@ -396,9 +451,11 @@ To disable this functionality, uncomment the last line in the `bin/start` file t
 
 ### Database
 
-The hostname of each service is the name of the service within the `compose.yaml` file. So for example, MySQL's hostname is `db` (not `localhost`) when accessing it from within a Docker container. Elasticsearch's hostname is `elasticsearch`.
+The default database image is MariaDB (`mariadb:11.4` in `compose.yaml`); MySQL is optional (see comments in that file).
 
-To connect to the MySQL CLI tool of the Docker instance, run:
+The hostname of each service is the name of the service within the `compose.yaml` file. The database service hostname is `db` (not `localhost`) when accessing it from within a Docker container. The `bin/mysql` and `bin/mysqldump` scripts work with MariaDB and MySQL. Elasticsearch's hostname is `elasticsearch`.
+
+To connect to the database CLI tool of the Docker instance, run:
 
 ```
 bin/mysql
@@ -439,7 +496,7 @@ bin/mysqldump > magento.sql
 
 ### Composer Authentication
 
-First setup Magento Marketplace authentication (details in the [DevDocs](http://devdocs.magento.com/guides/v2.0/install-gde/prereq/connect-auth.html)).
+First setup Magento Marketplace authentication (details in the [DevDocs](https://experienceleague.adobe.com/en/docs/commerce-operations/installation-guide/prerequisites/authentication-keys)).
 
 Copy `src/auth.json.sample` to `src/auth.json`. Then, update the username and password values with your Magento public and private keys, respectively. Finally, copy the file to the container by running `bin/copytocontainer auth.json`.
 
@@ -494,27 +551,17 @@ Otherwise, this project now automatically sets up Xdebug support with VS Code. I
 2. Install the [`PHP Debug`](https://marketplace.visualstudio.com/items?itemName=xdebug.php-debug) extension on VS Code.
 3. Create a new configuration file inside the project. Go to the `Run and Debug` section in VS Code, then click on `create a launch.json file`.
 4. Attention to the following configs inside the file:
-    * The port must be the same as the port on the xdebug.ini file.
+    * The port must match the `xdebug.client_port` defined in the xdebug container's config. To inspect it, run:
     ```bash
-      bin/cli cat /usr/local/etc/php/php.ini
+      bin/debug-cli cat /usr/local/etc/php/conf.d/php-xdebug.ini
     ```
-    ```bash
-      memory_limit = 4G
-      max_execution_time = 1800
-      zlib.output_compression = On
-      cgi.fix_pathinfo = 0
-      date.timezone = UTC
-
-      xdebug.mode = debug
+    ```ini
+      xdebug.mode = ${XDEBUG_MODE}
       xdebug.client_host = host.docker.internal
-      xdebug.idekey = PHPSTORM
-      xdebug.client_port=9003
-      #You can uncomment the following line to force the debug with each request
-      #xdebug.start_with_request=yes
-
-      upload_max_filesize = 100M
-      post_max_size = 100M
-      max_input_vars = 10000
+      xdebug.client_port = 9003
+      xdebug.start_with_request = yes
+      xdebug.output_dir = /var/www/html/var/profile
+      xdebug.profiler_output_name = cachegrind.out.%t.%p
     ```
     * The pathMappings should have the same folder path as the project inside the Docker container.
     ```json
@@ -541,11 +588,11 @@ Otherwise, this project now automatically sets up Xdebug support with VS Code. I
 
 ### Xdebug & PhpStorm
 
+Xdebug runs in a dedicated `phpfpm-xdebug` container. Nginx routes requests to it whenever the `XDEBUG_SESSION` cookie is present, so debugging is triggered per-request rather than via a CLI toggle.
+
 1.  First, install the [Chrome Xdebug helper](https://chrome.google.com/webstore/detail/xdebug-helper/eadndfjplgieldjbigjakmdgkmoaaaoc). After installed, right click on the Chrome icon for it and go to Options. Under IDE Key, select PhpStorm from the list to set the IDE Key to "PHPSTORM", then click Save.
 
-2.  Next, enable Xdebug debugging in the PHP container by running: `bin/xdebug enable`.
-
-3.  Then, open `PhpStorm > Preferences > PHP` and configure:
+2.  Open `PhpStorm > Preferences > PHP` and configure:
 
     * `CLI Interpreter`
         * Create a new interpreter from the `From Docker, Vagrant, VM...` list.
@@ -558,23 +605,23 @@ Otherwise, this project now automatically sets up Xdebug support with VS Code. I
     * `Path mappings`
         * There is no need to define a path mapping in this area.
 
-4. Open `PhpStorm > Preferences > PHP > Debug` and ensure Debug Port is set to `9000,9003`.
+3. Open `PhpStorm > Preferences > PHP > Debug` and ensure Debug Port is set to `9000,9003`.
 
-5. Open `PhpStorm > Preferences > PHP > Servers` and create a new server:
+4. Open `PhpStorm > Preferences > PHP > Servers` and create a new server:
 
-    * For the Name, set this to the value of your domain name (ex. `magento.test`).
+    * For the Name, set this to **`magento`** — this must match the `PHP_IDE_CONFIG` `serverName` value in `compose/env/phpfpm-xdebug.env` so Xdebug auto-matches this server entry.
     * For the Host, set this to the value of your domain name (ex. `magento.test`).
     * Keep port set to `80`.
     * Check the "Use path mappings" box and map `src` to the absolute path of `/var/www/html`.
 
-6. Go to `Run > Edit Configurations` and create a new `PHP Remote Debug` configuration.
+5. Go to `Run > Edit Configurations` and create a new `PHP Remote Debug` configuration.
 
-    * Set the Name to the name of your domain (ex. `magento.test`).
+    * Set the Name to whatever you like (ex. `magento.test`).
     * Check the `Filter debug connection by IDE key` checkbox, select the Server you just setup.
     * For IDE key, enter `PHPSTORM`. This value should match the IDE Key value set by the Chrome Xdebug Helper.
     * Click OK to finish setting up the remote debugger in PHPStorm.
 
-7. Open up `pub/index.php` and set a breakpoint near the end of the file.
+6. Open up `pub/index.php` and set a breakpoint near the end of the file.
 
     * Start the debugger with `Run > Debug 'magento.test'`, then open up a web browser.
     * Ensure the Chrome Xdebug helper is enabled by clicking on it and selecting Debug. The icon should turn bright green.
@@ -638,21 +685,94 @@ Add the following line to the `/etc/sysctl.conf` file on your host:
 vm.max_map_count=262144
 ```
 
+### Multi-storefront / multi-domain setup
+
+Magento supports running multiple storefronts from a single codebase by setting `MAGE_RUN_CODE` and `MAGE_RUN_TYPE` per request. There are two common ways to do this locally; pick whichever matches how your production environment is wired. Both rely on the [`compose.override.yaml`](#persisting-local-compose-changes-across-updates) mechanism so your customizations survive `bin/update`.
+
+#### Option 1: nginx `map` (recommended for most setups)
+
+Map each hostname to a run code in an nginx snippet, then mount it into the `app` container via `compose.override.yaml`:
+
+```nginx
+# store.map.conf
+map $http_host $MAGE_RUN_CODE {
+    store1.example.test  store1_view;
+    store2.example.test  store2_view;
+    default              default;
+}
+```
+
+```yaml
+# compose.override.yaml
+services:
+  app:
+    volumes:
+      - ./store.map.conf:/etc/nginx/conf.d/store.map.conf:cached
+```
+
+Add the hostnames to `/etc/hosts` and run `bin/setup-ssl store1.example.test store2.example.test`.
+
+#### Option 2: `magento-vars.php` (Adobe Commerce Cloud parity)
+
+If your production environment runs on Adobe Commerce Cloud, it likely uses a `magento-vars.php` file at the project root that's loaded via PHP's `auto_prepend_file`. To mirror that locally, create `src/magento-vars.php` and `src/php.ini`, then wire them up with `compose.override.yaml`:
+
+```php
+// src/magento-vars.php
+<?php
+function isHttpHost(string $host): bool {
+    return ($_SERVER['HTTP_HOST'] ?? '') === $host;
+}
+
+if (isHttpHost('store1.example.test')) {
+    $_SERVER['MAGE_RUN_CODE'] = 'store1_view';
+    $_SERVER['MAGE_RUN_TYPE'] = 'store';
+}
+```
+
+```ini
+; src/php.ini
+auto_prepend_file = /app/magento-vars.php
+```
+
+```yaml
+# compose.override.yaml
+services:
+  app:
+    volumes:
+      - ./src:/app:cached
+      - ./src/php.ini:/usr/local/etc/php/conf.d/local-php.ini:cached
+  phpfpm:
+    volumes:
+      - ./src:/app:cached
+      - ./src/php.ini:/usr/local/etc/php/conf.d/local-php.ini:cached
+```
+
+The nginx `map` approach is simpler and provider-agnostic; the `magento-vars.php` approach is worth the extra setup only if you specifically need to match Adobe Commerce Cloud's request lifecycle.
+
 ### Blackfire.io
 
-These docker images have built-in support for Blackfire.io. To use it, first register your server ID and token with the Blackfire agent:
+These docker images have built-in support for Blackfire.io. The Blackfire probe is already installed in the PHP image; the Blackfire agent runs as a separate sidecar container.
 
-```
-bin/root blackfire-agent --register --server-id={YOUR_SERVER_ID} --server-token={YOUR_SERVER_TOKEN}
-```
+To enable it:
 
-Next, open up the `bin/start` helper script and uncomment the line:
+1. Uncomment the `blackfire` service in `compose.yaml`.
+2. Add your server credentials to `env/blackfire.env`:
 
-```
-#bin/root /etc/init.d/blackfire-agent start
-```
+    ```
+    BLACKFIRE_SERVER_ID={YOUR_SERVER_ID}
+    BLACKFIRE_SERVER_TOKEN={YOUR_SERVER_TOKEN}
+    ```
 
-Finally, restart the containers with `bin/restart`. After doing so, everything is now configured and you can use a browser extension to profile your Magento store with Blackfire.
+3. Add your client credentials to `env/phpfpm.env`:
+
+    ```
+    BLACKFIRE_CLIENT_ID={YOUR_CLIENT_ID}
+    BLACKFIRE_CLIENT_TOKEN={YOUR_CLIENT_TOKEN}
+    ```
+
+4. Restart the containers with `bin/restart`.
+
+After doing so, everything is configured and you can use a browser extension to profile your Magento store with Blackfire.
 
 ### Cloudflare Tunnel
 
@@ -789,6 +909,16 @@ Additional information of how to work with SPX is available at https://www.youtu
 ## Known Issues
 
 There are currently no large known issues or workarounds needed to use docker-magento with your Magento project. If you find any, please [report them](https://github.com/markshust/docker-magento/issues)!
+
+## Alternatives
+
+### Mappia
+
+If you love using `docker-magento` for local development and are starting to think about how to run Magento in production, [Mappia](https://www.mappia.io/) may be a great next step.
+
+[Mappia](https://www.mappia.io/) is a production-grade tool for deploying Magento onto Kubernetes. It takes the same container-first approach you’re already using locally and extends it to scalable, secure, and repeatable deployments in the cloud—without forcing you to re-architect your application.
+
+If `docker-magento` helps you build Magento locally, [Mappia](https://www.mappia.io/) helps you operate it confidently in production—using the same container mindset, just at production scale.
 
 ## Credits
 

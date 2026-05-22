@@ -8,8 +8,8 @@ if [ ! -d "$REAL_SRC" ]; then
 fi
 
 if [ "$1" == "--all" ]; then
-    bin/rm-git
-    bin/rm-idea
+  bin/rm-git
+  bin/rm-idea
   docker cp "$CONTAINER_ID":/var/www/html/./ "$REAL_SRC/"
   echo "Completed copying all files from container to host"
 else

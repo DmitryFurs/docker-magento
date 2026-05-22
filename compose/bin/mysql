@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
+ENV_DIR="$(dirname "$0")/../env"
 # shellcheck source=../env/db.env
-source env/db.env
+source "$ENV_DIR/db.env"
 
 if [[ "$1" == "--db" ]]; then
   MYSQL_DATABASE="$2"

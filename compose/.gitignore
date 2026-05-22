@@ -15,6 +15,8 @@
 !/compose.dev-linux.yaml
 !/compose.dev-ssh.yaml
 !/compose.healthcheck.yaml
+!/compose.override.yaml
+!/compose.versions.yaml
 !/docker-compose.yml
 !/docker-compose.dev.yml
 !/docker-compose.dev-linux.yml

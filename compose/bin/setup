@@ -68,6 +68,9 @@ bin/clinotty bin/magento deploy:mode:set developer
 
 cp -r .vscode src/
 
+echo "Seeding src/.mcp.json for AI coding tools..."
+bin/setup-mcp || true
+
 echo "Docker development environment setup complete."
 echo "You may now access your Magento instance at https://${DOMAIN}/"
 

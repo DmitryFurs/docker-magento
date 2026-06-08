@@ -51,6 +51,7 @@ help:
 	@echo "$(call format,log,'Monitor the Magento log files. Pass no params to tail all files.')"
 	@echo "$(call format,magento,'Run the Magento CLI.')"
 	@echo "$(call format,magento-version,'Determine the Magento version installed in the current environment.')"
+	@echo "$(call format,mcp,'Start the docker-magento MCP server (stdio) for AI coding tools.')"
 	@echo "$(call format,mftf,'Run the Magento MFTF.')"
 	@echo "$(call format,mysql,'Run the MySQL CLI with database config from env/db.env.')"
 	@echo "$(call format,mysqldump,'Backup the Magento database.')"
@@ -75,6 +76,7 @@ help:
 	@echo "$(call format,setup-grunt,'Install and configure Grunt JavaScript task runner.')"
 	@echo "$(call format,setup-install,'Automates the installation process for a Magento instance.')"
 	@echo "$(call format,setup-integration-tests,'Script to set up integration tests.')"
+	@echo "$(call format,setup-mcp,'Seed src/.mcp.json so AI tools (Claude/Codex) use the docker-magento MCP server.')"
 	@echo "$(call format,setup-nginx,'Update Magento nginx.conf for cookie-triggered Xdebug routing. Auto-run by bin/setup; can be re-run for existing setups.')"
 	@echo "$(call format,setup-pwa-studio,'(BETA) Install PWA Studio.')"
 	@echo "$(call format,setup-pwa-studio-sampledata,'This script makes it easier to install Venia sample data.')"
@@ -171,6 +173,9 @@ magento:
 magento-version:
 	@./bin/magento-version
 
+mcp:
+	@./bin/mcp $(call args)
+
 mftf:
 	@./bin/mftf $(call args)
 
@@ -242,6 +247,9 @@ setup-install:
 
 setup-integration-tests:
 	@./bin/setup-integration-tests
+
+setup-mcp:
+	@./bin/setup-mcp
 
 setup-nginx:
 	@./bin/setup-nginx

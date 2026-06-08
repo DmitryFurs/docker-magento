@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+SRC="$ROOT/src"
+MCP_JSON="$SRC/.mcp.json"
+PROJECT_NAME="$(basename "$ROOT")"
+
+if [ ! -d "$SRC" ]; then
+  echo "Error: $SRC not found. Run this from a project root after bin/download / bin/setup." >&2
+  exit 1
+fi
+
+if command -v node >/dev/null 2>&1; then
+  node - "$MCP_JSON" "../bin/mcp" <<'NODE'
+const fs = require('fs');
+const [file, command] = process.argv.slice(2);
+let json = {};
+try { json = JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) { json = {}; }
+if (typeof json !== 'object' || json === null) json = {};
+json.mcpServers = json.mcpServers || {};
+json.mcpServers['docker-magento'] = { command, args: [] };
+fs.writeFileSync(file, JSON.stringify(json, null, 2) + '\n');
+NODE
+  echo "Updated $MCP_JSON (docker-magento -> ../bin/mcp), preserving any other MCP servers."
+elif [ ! -f "$MCP_JSON" ]; then
+  cat > "$MCP_JSON" <<'JSON'
+{
+  "mcpServers": {
+    "docker-magento": {
+      "command": "../bin/mcp",
+      "args": []
+    }
+  }
+}
+JSON
+  echo "Wrote $MCP_JSON (docker-magento -> ../bin/mcp)."
+else
+  echo "Warning: node not found and $MCP_JSON already exists; not overwriting." >&2
+  echo "Add this server manually under \"mcpServers\":" >&2
+  echo '  "docker-magento": { "command": "../bin/mcp", "args": [] }' >&2
+fi
+
+echo "Open Claude Code or Codex in the src/ directory to use the docker-magento MCP server."
+echo
+echo "For OpenAI Codex (global ~/.codex/config.toml), add:"
+echo
+echo "[mcp_servers.\"${PROJECT_NAME}-docker-magento\"]"
+echo "command = \"$ROOT/bin/mcp\""
+echo "args = []"

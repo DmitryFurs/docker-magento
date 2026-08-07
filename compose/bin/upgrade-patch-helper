@@ -21,9 +21,15 @@ bin/clinotty mv vendor/ vendor_orig/
 
 step "Step 3: Collecting packages to upgrade"
 packages=()
+update_all=false
+echo "Enter '*' to update all packages (composer update -W)."
 while true; do
     read -rp "Enter package name (or press Enter to finish): " pkg
     [[ -z "$pkg" ]] && break
+    if [[ "$pkg" == "*" ]]; then
+        update_all=true
+        break
+    fi
     read -rp "Enter version for $pkg (or press Enter to keep current constraint): " version
     if [[ -n "$version" ]]; then
         bin/clinotty composer remove "$pkg" --no-update
@@ -32,13 +38,17 @@ while true; do
     packages+=("$pkg")
 done
 
-if [[ ${#packages[@]} -eq 0 ]]; then
+if [[ "$update_all" == false && ${#packages[@]} -eq 0 ]]; then
     echo "No packages specified. Exiting."
     exit 1
 fi
 
 step "Step 4: Running composer update"
-bin/clinotty composer update "${packages[@]}" -w
+if [[ "$update_all" == true ]]; then
+    bin/clinotty composer update -W
+else
+    bin/clinotty composer update "${packages[@]}" -w
+fi
 
 step "Step 5: Generating vendor diff"
 bin/clinotty bash -c 'diff -urN vendor_orig/ vendor/ > vendor.patch; [ $? -le 1 ]'
@@ -51,7 +61,20 @@ bin/rootnotty bash -c "cd $UPGRADE_HELPER_PATH && php bin/patch-helper.php analy
 
 step "Step 8: Generating classmap"
 bin/clinotty composer dump-autoload --classmap-authoritative
-bin/clinotty bash -c 'php -r "\$classmap=require_once(\"vendor/composer/autoload_classmap.php\"); echo json_encode(\$classmap);" > classmap.json'
+bin/clinotty php -r "
+\$classmap = require 'vendor/composer/autoload_classmap.php';
+\$projectRoot = rtrim(getcwd(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+\$projectRootLength = strlen(\$projectRoot);
+foreach (\$classmap as \$className => \$filePath) {
+    if (str_starts_with(\$filePath, \$projectRoot)) {
+        \$classmap[\$className] = substr(\$filePath, \$projectRootLength);
+    }
+}
+\$json = json_encode(\$classmap, JSON_THROW_ON_ERROR);
+if (file_put_contents('classmap.json', \$json) === false) {
+    throw new RuntimeException('Unable to write classmap.json');
+}
+"
 
 step "Step 9: Copying results to host"
 rm -rf src/vendor src/vendor_orig

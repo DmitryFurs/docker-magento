@@ -1,4 +1,91 @@
 #!/usr/bin/env bash
 
-PHP_VERSION=$(bin/cli php -r "echo PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;")
-bin/cli ./vendor/bin/phpcs -p --colors --ignore-annotations --extensions=php,phtml --standard=PHPCompatibility --runtime-set testVersion "$PHP_VERSION" "$1"
+set -uo pipefail
+
+if (($# != 1)); then
+    printf 'Usage: bin/analysers/php-compatibility <path>\n' >&2
+    exit 2
+fi
+
+TARGET="$1"
+
+if ! bin/cli test -e "$TARGET"; then
+    printf 'Target does not exist in the PHP container: %s\n' "$TARGET" >&2
+    exit 2
+fi
+
+if ! PHP_VERSION="$(bin/cli php -r 'echo PHP_MAJOR_VERSION, ".", PHP_MINOR_VERSION;')"; then
+    exit 1
+fi
+
+PHP_COMPATIBILITY_STATUS=0
+bin/cli ./vendor/bin/phpcs \
+    -p \
+    --colors \
+    --ignore-annotations \
+    --extensions=php,phtml \
+    --standard=PHPCompatibility \
+    --runtime-set testVersion "$PHP_VERSION" \
+    "$TARGET" || PHP_COMPATIBILITY_STATUS=$?
+
+PHP_RUNTIME_STATUS=0
+bin/clinotty bash -s -- "$TARGET" <<'PHP_RUNTIME_CHECK' || PHP_RUNTIME_STATUS=$?
+set -uo pipefail
+
+target="$1"
+checked=0
+failed=0
+php_version="$(php -r 'echo PHP_VERSION;')"
+
+printf 'Native PHP %s compile check: %s\n' "$php_version" "$target" >&2
+
+while IFS= read -r -d '' file; do
+    checked=$((checked + 1))
+
+    if output="$(php \
+        -d error_reporting=-1 \
+        -d display_errors=1 \
+        -d display_startup_errors=1 \
+        -d log_errors=0 \
+        -d html_errors=0 \
+        -l "$file" 2>&1)"; then
+        status=0
+    else
+        status=$?
+    fi
+
+    expected="No syntax errors detected in $file"
+
+    if ((status != 0)) || [[ "$output" != "$expected" ]]; then
+        printf '%s\n' "$output" >&2
+        failed=$((failed + 1))
+    fi
+done < <(
+    if [[ -f "$target" ]]; then
+        case "$target" in
+            *.php|*.phtml)
+                printf '%s\0' "$target"
+                ;;
+        esac
+    else
+        find "$target" -type f \( -name '*.php' -o -name '*.phtml' \) -print0
+    fi
+)
+
+if ((checked == 0)); then
+    printf 'No PHP or PHTML files found: %s\n' "$target" >&2
+    exit 2
+fi
+
+printf 'Native PHP compile check: %d checked, %d with diagnostics\n' "$checked" "$failed" >&2
+
+((failed == 0))
+PHP_RUNTIME_CHECK
+
+if ((PHP_RUNTIME_STATUS == 2)); then
+    exit 2
+fi
+
+if ((PHP_COMPATIBILITY_STATUS != 0 || PHP_RUNTIME_STATUS != 0)); then
+    exit 1
+fi

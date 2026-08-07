@@ -21,6 +21,7 @@ rsync -a --delete --include='.gitignore' \
       --exclude='dumps' \
       --exclude='images' \
       --exclude='ticket' \
+      --exclude='/compose.override.yaml' \
       "$TMPDIR/repo/compose/" ./
 
 echo "docker-magento has been updated from $REPO@$BRANCH"

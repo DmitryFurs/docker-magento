@@ -158,7 +158,7 @@ mkdir -p ~/Sites/magento
 cd $_
 
 # Run this automated one-liner from the directory you want to install your project.
-curl -s https://raw.githubusercontent.com/DmitryFurs/docker-magento/master/lib/onelinesetup | bash -s -- magento.test mageos 3.0.0
+curl -s https://raw.githubusercontent.com/DmitryFurs/docker-magento/custom/lib/onelinesetup | bash -s -- magento.test mageos 3.0.0
 ```
 
 The `magento.test` above defines the hostname to use, `mageos` is the edition (Mage-OS, the default), and `3.0.0` defines the version to install. Pass `community 2.4.9` (or another edition/version pair) instead to install Adobe Commerce / Magento Open Source. Note that since we need a write to `/etc/hosts` for DNS resolution, you will be prompted for your system password during setup.
